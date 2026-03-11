@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Your Gummy Strain | Mood</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+      background: transparent;
+      overflow-x: hidden;
+    }
+
+    * { box-sizing: border-box; }
+
+    .quiz-wrapper {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .quiz-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      border: 1px solid #E8E8E8;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    .progress-track {
+      height: 3px;
+      background: #F0F0F0;
+      display: none;
+    }
+
+    .progress-track.active { display: block; }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2D4A3E, #4A7A68);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 3px;
+    }
+
+    .quiz-content {
+      padding: 36px 32px;
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .quiz-content.fade-out {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .quiz-content.fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .intro { text-align: center; }
+    .intro-icon { font-size: 44px; margin-bottom: 16px; }
+    .intro h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 26px; font-weight: 800; color: #1A1A1A;
+      margin: 0 0 10px; line-height: 1.2; letter-spacing: -0.02em;
+    }
+    .intro p {
+      color: #777; font-size: 14px; line-height: 1.6;
+      margin: 0 auto 28px; max-width: 360px;
+    }
+    .btn-start {
+      background: #2D4A3E; color: #FFF;
+      border: none; border-radius: 12px; padding: 14px 44px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: inherit; letter-spacing: 0.02em; transition: all 0.2s ease;
+    }
+    .btn-start:hover { background: #3B5E4F; transform: scale(1.03); }
+
+    .question-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .question-step { color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+    .question-icon { font-size: 22px; }
+    .question-text {
+      font-family: 'Fraunces', serif;
+      font-size: 20px; font-weight: 700; color: #1A1A1A;
+      margin: 0 0 22px; line-height: 1.3;
+    }
+    .options { display: flex; flex-direction: column; gap: 8px; }
+    .option-btn {
+      display: flex; align-items: center; gap: 12px;
+      background: #FAFAFA; border: 1px solid #E8E8E8;
+      border-radius: 12px; padding: 14px 18px; color: #333;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      font-family: inherit; text-align: left; transition: all 0.2s ease; width: 100%;
+    }
+    .option-btn:hover { background: #F0F7F4; border-color: #B8D4C8; }
+    .option-btn.selected { background: #EBF5F0; border-color: #2D4A3E; transform: scale(0.98); }
+    .option-emoji { font-size: 20px; flex-shrink: 0; }
+
+    .result-header { text-align: center; margin-bottom: 22px; }
+    .result-badge {
+      display: inline-block; background: #EBF5F0; color: #2D4A3E;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; padding: 5px 14px; border-radius: 100px; margin-bottom: 14px;
+    }
+    .result-name {
+      font-family: 'Fraunces', serif;
+      font-size: 22px; font-weight: 800; color: #1A1A1A; margin: 0 0 4px; line-height: 1.25;
+    }
+    .result-type { color: #888; font-size: 13px; margin: 0 0 12px; }
+    .terpene-tags { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; }
+    .terpene-tag {
+      display: inline-block; background: #F4F4F4;
+      border: 1px solid #E0E0E0; border-radius: 100px;
+      padding: 4px 12px; font-size: 12px; font-weight: 500; color: #555;
+    }
+    .result-card { border-radius: 16px; padding: 22px; margin-bottom: 20px; }
+    .result-tagline {
+      font-family: 'Fraunces', serif;
+      font-size: 17px; font-weight: 700; color: #FFF; margin: 0 0 10px; line-height: 1.3;
+    }
+    .result-why { color: rgba(255,255,255,0.9); font-size: 13px; line-height: 1.65; margin: 0; }
+    .result-actions { display: flex; gap: 10px; }
+    .btn-shop {
+      flex: 1; display: block; text-align: center; background: #2D4A3E; color: #FFF;
+      border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700;
+      text-decoration: none; font-family: inherit; transition: all 0.2s ease;
+    }
+    .btn-shop:hover { background: #3B5E4F; transform: scale(1.03); }
+    .btn-retake {
+      background: #FAFAFA; border: 1px solid #E0E0E0;
+      color: #777; border-radius: 12px; padding: 14px 22px;
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.2s ease;
+    }
+    .btn-retake:hover { color: #333; border-color: #CCC; }
+    .footer-note { text-align: center; color: #BBB; font-size: 11px; margin-top: 16px; line-height: 1.5; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-wrapper">
+    <div class="quiz-card">
+      <div class="progress-track" id="progressTrack">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="quiz-content fade-in" id="quizContent">
+        <div id="introScreen" class="intro">
+          <div class="intro-icon">🍬</div>
+          <h1>Find Your Gummy Strain</h1>
+          <p>Answer 4 quick questions and we'll match you with the right indica, sativa, or hybrid gummy for your goals.</p>
+          <button class="btn-start" id="btnStart">Find My Match</button>
+        </div>
+        <div id="questionScreen" class="hidden"></div>
+        <div id="resultScreen" class="hidden"></div>
+      </div>
+    </div>
+    <p class="footer-note">Effects vary by individual. All Mood products are hemp-derived, third-party lab tested, and intended for adults 21+.</p>
+  </div>
+
+  <script>
+    var QUESTIONS = [
+      { id: "goal", question: "What are you looking for from a gummy?", icon: "🎯", options: [
+        { label: "Wind down and promote rest", value: "rest", icon: "🌙" },
+        { label: "Energy, creativity, or focus", value: "energy", icon: "⚡" },
+        { label: "A balanced, go-with-the-flow vibe", value: "balanced", icon: "⚖️" },
+        { label: "Fun for a social setting", value: "social", icon: "🎉" }
+      ]},
+      { id: "timing", question: "When do you usually enjoy gummies?", icon: "🕐", options: [
+        { label: "Evening or nighttime", value: "evening", icon: "🌆" },
+        { label: "Daytime or afternoon", value: "daytime", icon: "☀️" },
+        { label: "It varies — I want something flexible", value: "anytime", icon: "🔄" }
+      ]},
+      { id: "experience", question: "How much experience do you have with edibles?", icon: "🌱", options: [
+        { label: "Brand new — this would be my first", value: "beginner", icon: "🌱" },
+        { label: "Some experience — I know the basics", value: "moderate", icon: "🌿" },
+        { label: "Very experienced — I want something strong", value: "experienced", icon: "🌳" }
+      ]},
+      { id: "intensity", question: "How intense do you want the experience?", icon: "🔊", options: [
+        { label: "Mild and subtle — just take the edge off", value: "mild", icon: "🪶" },
+        { label: "Moderate — a solid, noticeable experience", value: "moderate", icon: "🎵" },
+        { label: "Strong — I want the full ride", value: "strong", icon: "🚀" }
+      ]}
+    ];
+
+    var RESULTS = {
+      sleepytime: {
+        name: "Sleepytime Delta-9 THC Gummies",
+        type: "Indica-leaning · Rest-focused",
+        tags: ["THC + CBN + CBD", "Evening use"],
+        tagline: "Deep relaxation built for restful nights",
+        why: "This formula pairs Delta-9 THC with CBN and CBD, the cannabinoid combination most associated with full-body relaxation and winding down. The indica-leaning terpene profile promotes calm without next-day grogginess. A go-to for evening routines.",
+        url: "https://mood.com/product/sleepytime-delta-9-thc-gummies",
+        gradient: "linear-gradient(135deg, #3B3455 0%, #5B4F82 100%)"
+      },
+      sleepytimeAdvanced: {
+        name: "Sleepytime Advanced THC Gummies",
+        type: "Indica-leaning · Strong rest formula",
+        tags: ["High-potency CBN blend", "Experienced users"],
+        tagline: "A heavier wind-down for experienced users",
+        why: "Everything the original Sleepytime does, turned up. The Advanced formula delivers a more potent indica-leaning experience for users who have dialed in their tolerance and want deeper relaxation. Best saved for nights when you have nowhere to be in the morning.",
+        url: "https://mood.com/product/sleepytime-advanced-thc-gummies",
+        gradient: "linear-gradient(135deg, #2A2545 0%, #483D6E 100%)"
+      },
+      epicEuphoria: {
+        name: "Epic Euphoria THC Gummies",
+        type: "Sativa-leaning · Social & creative",
+        tags: ["THC + functional mushrooms", "Daytime use"],
+        tagline: "Clear-headed euphoria for your best hours",
+        why: "Epic Euphoria combines Delta-9 THC with five functional mushrooms for a bright, uplifting experience that keeps you present and engaged. The sativa-leaning profile supports creativity and social energy without the heavy body feel. Great for concerts, creative sessions, or afternoons with friends.",
+        url: "https://mood.com/product/epic-euphoria-thc-gummies",
+        gradient: "linear-gradient(135deg, #2D4A3E 0%, #4A7A68 100%)"
+      },
+      morning: {
+        name: "Morning Delta-9 THC Gummies",
+        type: "Sativa-leaning · Energizing",
+        tags: ["THC + THCV", "Daytime focus"],
+        tagline: "Energized focus without the crash",
+        why: "Formulated with THCV for a daytime-friendly experience that supports focus and clarity. The sativa-leaning profile delivers a gentle buzz with uplifted energy, making it a natural fit for productive afternoons or active weekends. No caffeine jitters, no midday crash.",
+        url: "https://mood.com/product/morning-delta-9-thc-gummies",
+        gradient: "linear-gradient(135deg, #8B6914 0%, #A67D1A 100%)"
+      },
+      mindMagic: {
+        name: "Mind Magic THC Gummies",
+        type: "Sativa-leaning · Creative focus",
+        tags: ["THC + nootropic blend", "Creativity"],
+        tagline: "Unlock your creative headspace",
+        why: "Mind Magic pairs THC with a nootropic-inspired blend designed to support cognitive clarity and creative thinking. If your ideal gummy experience is one where ideas flow and focus sharpens, this is the formula built for that. Popular with artists, writers, and anyone chasing a creative edge.",
+        url: "https://mood.com/product/mind-magic-thc-gummies",
+        gradient: "linear-gradient(135deg, #4A3B6E 0%, #6B5A96 100%)"
+      },
+      delta9_15: {
+        name: "15mg Delta-9 THC Gummies",
+        type: "Hybrid · Balanced everyday",
+        tags: ["Classic Delta-9", "Anytime use"],
+        tagline: "Mood's bestseller — balanced and versatile",
+        why: "The 15mg gummy is Mood's most popular product for a reason. It delivers a reliable, balanced experience that works across indica, sativa, and hybrid vibes depending on your setting and mindset. Flexible enough for a chill evening or an upbeat afternoon. The everyday all-rounder.",
+        url: "https://mood.com/product/15mg-delta-9-thc-gummies",
+        gradient: "linear-gradient(135deg, #2D4A3E 0%, #3B5E4F 100%)"
+      },
+      microdose: {
+        name: "Micro-Dose Delta-9 THC Gummies",
+        type: "Hybrid · Gentle introduction",
+        tags: ["5mg Delta-9", "Beginner-friendly"],
+        tagline: "A gentle first step into edibles",
+        why: "At 5mg per gummy, the Micro-Dose is designed for newcomers who want to ease in without overdoing it. The low THC amount delivers mild relaxation and a gentle mood uplift, giving you room to find your comfort zone. Start here, then explore from a place of confidence.",
+        url: "https://mood.com/product/micro-dose-delta-9-thc-gummies",
+        gradient: "linear-gradient(135deg, #5A7A6A 0%, #7A9A8A 100%)"
+      },
+      delta9_30: {
+        name: "30mg Delta-9 THC Gummies",
+        type: "Hybrid · Strong & full-bodied",
+        tags: ["30mg Delta-9", "Experienced users"],
+        tagline: "Full-bodied intensity for seasoned users",
+        why: "The 30mg gummy is built for people who know their tolerance and want a stronger, longer-lasting experience. It delivers pronounced euphoria and deep relaxation in a single piece. Not a beginner gummy, but for experienced users, it is the sweet spot between the 15mg and Hero Dose.",
+        url: "https://mood.com/product/30mg-delta-9-thc-gummies",
+        gradient: "linear-gradient(135deg, #3E2D2D 0%, #5E4A4A 100%)"
+      },
+      heroDose: {
+        name: "Hero Dose Rapid Onset THC Gummies",
+        type: "Hybrid · Maximum strength",
+        tags: ["50mg fast-acting", "Seasoned users only"],
+        tagline: "The strongest gummy in the Mood lineup",
+        why: "Hero Dose combines high-potency THC with rapid onset nano-emulsion technology, so you feel effects in roughly 15 to 20 minutes instead of the usual 45 to 90. This is for seasoned users who want an intense, full-spectrum experience and are confident in their tolerance. Start slow even here.",
+        url: "https://mood.com/product/hero-dose-rapid-onset-thc-gummies",
+        gradient: "linear-gradient(135deg, #8B2020 0%, #A63030 100%)"
+      }
+    };
+
+    var currentStep = -1;
+    var answers = {};
+    var quizContent = document.getElementById("quizContent");
+    var introScreen = document.getElementById("introScreen");
+    var questionScreen = document.getElementById("questionScreen");
+    var resultScreen = document.getElementById("resultScreen");
+    var progressTrack = document.getElementById("progressTrack");
+    var progressBar = document.getElementById("progressBar");
+
+    function sendHeight() {
+      var h = document.documentElement.scrollHeight;
+      window.parent.postMessage({ type: "quiz-resize", height: h }, "*");
+    }
+
+    document.getElementById("btnStart").addEventListener("click", function() {
+      currentStep = 0; answers = {};
+      transitionTo(showQuestion);
+    });
+
+    function transitionTo(cb) {
+      quizContent.classList.remove("fade-in");
+      quizContent.classList.add("fade-out");
+      setTimeout(function() {
+        cb();
+        quizContent.classList.remove("fade-out");
+        quizContent.classList.add("fade-in");
+        setTimeout(sendHeight, 100);
+      }, 300);
+    }
+
+    function showQuestion() {
+      var q = QUESTIONS[currentStep];
+      introScreen.classList.add("hidden");
+      resultScreen.classList.add("hidden");
+      questionScreen.classList.remove("hidden");
+      progressTrack.classList.add("active");
+      progressBar.style.width = ((currentStep + 1) / QUESTIONS.length * 100) + "%";
+      var html = '<div class="question-header"><span class="question-step">Question ' + (currentStep + 1) + ' of ' + QUESTIONS.length + '</span><span class="question-icon">' + q.icon + '</span></div><h2 class="question-text">' + q.question + '</h2><div class="options">';
+      for (var i = 0; i < q.options.length; i++) {
+        var o = q.options[i];
+        html += '<button class="option-btn" data-qid="' + q.id + '" data-value="' + o.value + '"><span class="option-emoji">' + o.icon + '</span><span>' + o.label + '</span></button>';
+      }
+      html += '</div>';
+      questionScreen.innerHTML = html;
+      questionScreen.querySelectorAll(".option-btn").forEach(function(btn) { btn.addEventListener("click", handleOptionClick); });
+    }
+
+    function handleOptionClick(e) {
+      var btn = e.currentTarget;
+      btn.classList.add("selected");
+      answers[btn.dataset.qid] = btn.dataset.value;
+      questionScreen.querySelectorAll(".option-btn").forEach(function(b) { b.style.pointerEvents = "none"; });
+      setTimeout(function() {
+        if (currentStep < QUESTIONS.length - 1) { currentStep++; transitionTo(showQuestion); }
+        else { transitionTo(function() { showResult(RESULTS[getResult(answers)]); }); }
+      }, 400);
+    }
+
+    function getResult(a) {
+      /* Beginners always get microdose regardless of other answers */
+      if (a.experience === "beginner") return "microdose";
+
+      /* Strong intensity + experienced = high-potency picks */
+      if (a.intensity === "strong" && a.experience === "experienced") {
+        if (a.goal === "rest" || a.timing === "evening") return "sleepytimeAdvanced";
+        return "heroDose";
+      }
+      if (a.intensity === "strong") {
+        if (a.goal === "rest" || a.timing === "evening") return "sleepytime";
+        return "delta9_30";
+      }
+
+      /* Rest / evening paths */
+      if (a.goal === "rest") {
+        if (a.experience === "experienced") return "sleepytimeAdvanced";
+        return "sleepytime";
+      }
+      if (a.timing === "evening" && a.intensity !== "mild") return "sleepytime";
+
+      /* Energy / creativity paths */
+      if (a.goal === "energy") {
+        if (a.timing === "daytime") return "morning";
+        return "mindMagic";
+      }
+
+      /* Social paths */
+      if (a.goal === "social") return "epicEuphoria";
+
+      /* Balanced / anytime paths */
+      if (a.goal === "balanced") {
+        if (a.intensity === "mild") return "microdose";
+        if (a.experience === "experienced") return "delta9_30";
+        return "delta9_15";
+      }
+
+      /* Fallback */
+      return "delta9_15";
+    }
+
+    function showResult(r) {
+      questionScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      progressTrack.classList.remove("active");
+      var tagHtml = '';
+      for (var i = 0; i < r.tags.length; i++) { tagHtml += '<span class="terpene-tag">' + r.tags[i] + '</span>'; }
+      resultScreen.innerHTML = '<div class="result-header"><div class="result-badge">Your Match</div><h2 class="result-name">' + r.name + '</h2><p class="result-type">' + r.type + '</p><div class="terpene-tags">' + tagHtml + '</div></div><div class="result-card" style="background:' + r.gradient + '"><p class="result-tagline">' + r.tagline + '</p><p class="result-why">' + r.why + '</p></div><div class="result-actions"><a href="' + r.url + '" target="_blank" rel="noopener noreferrer" class="btn-shop">Shop Now</a><button class="btn-retake" id="btnRetake">Retake</button></div>';
+      document.getElementById("btnRetake").addEventListener("click", function() {
+        currentStep = -1; answers = {};
+        transitionTo(function() {
+          questionScreen.classList.add("hidden"); resultScreen.classList.add("hidden");
+          introScreen.classList.remove("hidden"); progressTrack.classList.remove("active");
+        });
+      });
+    }
+
+    window.addEventListener("load", sendHeight);
+  </script>
+</body>
+</html>
